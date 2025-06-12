@@ -3,9 +3,10 @@
 #include <stdlib.h>
 
 #define MAX_LEN 256
+#define KEYWORD_LEN 8
 
 typedef struct {
-    char keyword[8];
+    char keyword[KEYWORD_LEN];
     char message[MAX_LEN];
 } EasterEgg;
 
@@ -17,18 +18,16 @@ EasterEgg arthurEgg = {
 };
 
 void charToBinary(char c, char *bin) {
-    int i;
-    for (i = 7; i >= 0; i--) {
+    for (int i = 7; i >= 0; i--) {
         bin[7 - i] = ((c >> i) & 1) + '0';
     }
     bin[8] = '\0';
 }
 
 int isRightChar(char bin[][9], char *input) {
-    int i, j;
-    for (i = 0; i < 7; i++) {
+    for (int i = 0; i < 7; i++) {
         char expected = 0;
-        for (j = 0; j < 8; j++) {
+        for (int j = 0; j < 8; j++) {
             expected = (expected << 1) | (bin[i][j] - '0');
         }
         if (input[i] != expected) {
@@ -43,19 +42,18 @@ int isEasterEgg(char *input) {
 }
 
 void find_easter_egg() {
-    int i;
-    char binaries[7][9];
-    char input[8];
-    char finalWord[8];
+    char binaries[7][9];  // 7 chars, 8 bits + null
+    char input[8];        // 7 chars + null
+    char finalWord[KEYWORD_LEN];
 
     printf("<<Arthur's Easter Egg>>\n");
 
-    for (i = 0; i < 7; i++) {
+    for (int i = 0; i < 7; i++) {
         charToBinary(arthurEgg.keyword[i], binaries[i]);
     }
 
     printf("Enter characters for reversed binary codes:\n");
-    for (i = 6; i >= 0; i--) {
+    for (int i = 6; i >= 0; i--) {
         printf("%s ", binaries[i]);
     }
     printf("\n");
@@ -79,20 +77,21 @@ void find_easter_egg() {
 }
 
 void scrambleAndBinary() {
-    char temp[8];
-    char odd[8], even[8];
+    char temp[KEYWORD_LEN];
+    char odd[KEYWORD_LEN], even[KEYWORD_LEN];
     int o = 0, e = 0;
-    int i;
     char bin[9];
-    strcpy(temp, arthurEgg.keyword);
 
-    for (i = 0; i < 3; i++) {
+    strncpy(temp, arthurEgg.keyword, KEYWORD_LEN);
+    temp[KEYWORD_LEN - 1] = '\0';
+
+    for (int i = 0; i < 3; i++) {
         char t = temp[i];
         temp[i] = temp[6 - i];
         temp[6 - i] = t;
     }
 
-    for (i = 0; i < 7; i++) {
+    for (int i = 0; i < 7; i++) {
         if (i % 2 == 1) {
             odd[o++] = temp[i];
         } else {
@@ -100,11 +99,11 @@ void scrambleAndBinary() {
         }
     }
 
-    for (i = 0; i < o; i++) {
+    for (int i = 0; i < o; i++) {
         charToBinary(odd[i], bin);
         printf("%s ", bin);
     }
-    for (i = 0; i < e; i++) {
+    for (int i = 0; i < e; i++) {
         charToBinary(even[i], bin);
         printf("%s ", bin);
     }
@@ -133,6 +132,7 @@ void training_menu() {
         printf("Select option: ");
         if (scanf("%d", &choice) != 1) {
             while (getchar() != '\n');
+            printf("Invalid input. Please enter a number.\n");
             continue;
         }
 
@@ -155,3 +155,4 @@ int main() {
     training_menu();
     return 0;
 }
+
