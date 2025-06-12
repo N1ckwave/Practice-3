@@ -1,158 +1,90 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 
-#define MAX_LEN 256
-#define KEYWORD_LEN 8
+#define MAX_MSG 300
+#define KEY_LEN 8
 
 typedef struct {
-    char keyword[KEYWORD_LEN];
-    char message[MAX_LEN];
+    char keyword[KEY_LEN];
+    char message[MAX_MSG];
 } EasterEgg;
 
-EasterEgg arthurEgg = {
+const EasterEgg arthurEgg = {
     "specter",
-    "I confess. After graduating from university, I was blinded by the arrogance of starting a startup and recklessly blocked my friends' paths. "
-    "I painfully learned that when I am the only one convinced by my idea, it leads to disastrous results. "
-    "The past Arthur was a ghost of dogmatism and stubbornness."
+    "I confess. After graduating, I was blinded by startup arrogance and "
+    "blocked friends' paths. I learned that when only I believe an idea, "
+    "it leads to disaster. Past Arthur was a ghost of stubbornness."
 };
 
-void charToBinary(char c, char *bin) {
-    for (int i = 7; i >= 0; i--) {
-        bin[7 - i] = ((c >> i) & 1) + '0';
-    }
+void charToBinary(char c, char bin[9]) {
+    for (int i = 7; i >= 0; i--)
+        bin[7-i] = ((c >> i) & 1) + '0';
     bin[8] = '\0';
 }
 
-int isRightChar(char bin[][9], char *input) {
+int validateInput(const char bins[7][9], const char* input) {
     for (int i = 0; i < 7; i++) {
         char expected = 0;
-        for (int j = 0; j < 8; j++) {
-            expected = (expected << 1) | (bin[i][j] - '0');
-        }
-        if (input[i] != expected) {
-            return 0;
-        }
+        for (int j = 0; j < 8; j++)
+            expected = (expected << 1) | (bins[i][j] - '0');
+        if (input[i] != expected) return 0;
     }
     return 1;
 }
 
-int isEasterEgg(char *input) {
-    return strcmp(input, arthurEgg.keyword) == 0;
-}
-
-void find_easter_egg() {
-    char binaries[7][9];  // 7 chars, 8 bits + null
-    char input[8];        // 7 chars + null
-    char finalWord[KEYWORD_LEN];
-
-    printf("<<Arthur's Easter Egg>>\n");
-
+void findEasterEgg() {
+    char bins[7][9], input[8], final[KEY_LEN];
+    
+    printf("<<Arthur's Easter Egg>>\nBinary codes (reversed):\n");
     for (int i = 0; i < 7; i++) {
-        charToBinary(arthurEgg.keyword[i], binaries[i]);
+        charToBinary(arthurEgg.keyword[i], bins[i]);
+        printf("%s ", bins[6-i]);
     }
-
-    printf("Enter characters for reversed binary codes:\n");
-    for (int i = 6; i >= 0; i--) {
-        printf("%s ", binaries[i]);
-    }
-    printf("\n");
-
+    
+    printf("\nEnter characters: ");
     scanf("%7s", input);
-
-    if (!isRightChar(binaries, input)) {
-        printf("Incorrect input. Try again.\n");
+    if (!validateInput(bins, input)) {
+        printf("Incorrect input.\n");
         return;
     }
-
-    printf("Combine the characters into a word: ");
-    scanf("%7s", finalWord);
-
-    if (isEasterEgg(finalWord)) {
-        printf("##Easter Egg Discovered!$$\n");
-        printf("%s\n", arthurEgg.message);
+    
+    printf("Combine into word: ");
+    scanf("%7s", final);
+    if (strcmp(final, arthurEgg.keyword) == 0) {
+        printf("##Easter Egg!$$\n%s\n", arthurEgg.message);
     } else {
-        printf("Wrong word. Returning to menu.\n");
+        printf("Wrong word.\n");
     }
 }
 
-void scrambleAndBinary() {
-    char temp[KEYWORD_LEN];
-    char odd[KEYWORD_LEN], even[KEYWORD_LEN];
-    int o = 0, e = 0;
-    char bin[9];
-
-    strncpy(temp, arthurEgg.keyword, KEYWORD_LEN);
-    temp[KEYWORD_LEN - 1] = '\0';
-
-    for (int i = 0; i < 3; i++) {
-        char t = temp[i];
-        temp[i] = temp[6 - i];
-        temp[6 - i] = t;
-    }
-
-    for (int i = 0; i < 7; i++) {
-        if (i % 2 == 1) {
-            odd[o++] = temp[i];
-        } else {
-            even[e++] = temp[i];
-        }
-    }
-
-    for (int i = 0; i < o; i++) {
-        charToBinary(odd[i], bin);
-        printf("%s ", bin);
-    }
-    for (int i = 0; i < e; i++) {
-        charToBinary(even[i], bin);
-        printf("%s ", bin);
-    }
-    printf("\n");
+void selfManagementMenu() {
+    char name[32];
+    printf("2. Self-Management\nName: ");
+    scanf("%31s", name);
+    if (strcmp(name, "Arthur") == 0) findEasterEgg();
+    else printf("Welcome, %s\n", name);
 }
 
-void self_management_menu() {
-    char input[32];
-    printf("2. Self-Management and Teamwork\n");
-    printf("Enter your name: ");
-    scanf("%31s", input);
-    if (strcmp(input, "Arthur") == 0) {
-        find_easter_egg();
-    } else {
-        printf("Welcome, %s\n", input);
-    }
-}
-
-void training_menu() {
-    int choice;
+void trainingMenu() {
     while (1) {
-        printf("\n[II. Training]\n");
-        printf("1. Communication\n");
-        printf("2. Self-Management and Teamwork\n");
-        printf("3. Exit\n");
-        printf("Select option: ");
+        printf("\n[Training Menu]\n1. Communication\n2. Self-Management\n3. Exit\nChoice: ");
+        int choice;
         if (scanf("%d", &choice) != 1) {
             while (getchar() != '\n');
-            printf("Invalid input. Please enter a number.\n");
+            printf("Invalid input.\n");
             continue;
         }
-
+        
         switch (choice) {
-            case 1:
-                printf("Coming soon: Communication Training\n");
-                break;
-            case 2:
-                self_management_menu();
-                break;
-            case 3:
-                return;
-            default:
-                printf("Invalid option.\n");
+            case 1: printf("Communication training coming soon.\n"); break;
+            case 2: selfManagementMenu(); break;
+            case 3: return;
+            default: printf("Invalid option.\n");
         }
     }
 }
 
 int main() {
-    training_menu();
+    trainingMenu();
     return 0;
 }
-
