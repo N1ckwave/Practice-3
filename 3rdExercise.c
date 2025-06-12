@@ -97,42 +97,51 @@ void viewData() {
 }
 
 void overcomeTrauma() {
-    char c;
+    char c[10];
     srand(time(NULL));
     do {
         printf("\n--- Trauma Management ---\nA. Input Trauma\nB. Counseling\nC. View Results\nX. Back\nChoice: ");
-        scanf(" %c", &c);
-        c == 'A' || c == 'a' ? inputTrauma() :
-        c == 'B' || c == 'b' ? session() :
-        c == 'C' || c == 'c' ? viewData() :
-        (void)0;
-    } while (c != 'X' && c != 'x');
+        scanf("%s", c);
+        !strcmp(c, "A") || !strcmp(c, "a") ? inputTrauma() :
+        !strcmp(c, "B") || !strcmp(c, "b") ? session() :
+        !strcmp(c, "C") || !strcmp(c, "c") ? viewData() : (void)0;
+    } while (strcmp(c, "X") && strcmp(c, "x"));
 }
 
 void trainingMenu() {
-    char c;
+    char choice[10];
     do {
-        printf("\n--- II. Training ---\n1. Daily Practice\n2. Self-Management and Teamwork\nX. Back\nChoice: ");
-        scanf(" %c", &c);
-        if (c == '2') {
-            char sub;
+        printf("\n--- II. Training ---\n");
+        printf("1. Daily Practice\n");
+        printf("2. Self-Management and Teamwork\n");
+        printf("X. Back\nSelect: ");
+        scanf("%s", choice);
+
+        if (!strcmp(choice, "2")) {
+            char sub[10];
             do {
-                printf("\n--- 2. Self-Management and Teamwork ---\nA. Mental Check\nB. Trauma Management\nX. Back\nChoice: ");
-                scanf(" %c", &sub);
-                (sub == 'B' || sub == 'b') ? overcomeTrauma() : (void)0;
-            } while (sub != 'X' && sub != 'x');
+                printf("\n--- 2. Self-Management and Teamwork ---\n");
+                printf("A. Mental Check\n");
+                printf("B. Trauma Management\n");
+                printf("X. Back\nSelect: ");
+                scanf("%s", sub);
+
+                if (!strcmp(sub, "B") || !strcmp(sub, "b")) {
+                    overcomeTrauma();
+                }
+            } while (strcmp(sub, "X") && strcmp(sub, "x"));
         }
-    } while (c != 'X' && c != 'x');
+
+    } while (strcmp(choice, "X") && strcmp(choice, "x"));
 }
 
 int main() {
-    char choice;
+    char choice[10];
     do {
         printf("\n=== Main Menu ===\nI. Performance\nII. Training\nX. Exit\nSelect: ");
-        scanf(" %c", &choice);
-        (choice == 'I' || choice == 'i') ? printf("Performance section.\n") :
-        (choice == 'II' || choice == 'i') ? trainingMenu() :
-        (void)0;
-    } while (choice != 'X' && choice != 'x');
+        scanf("%s", choice);
+        !strcmp(choice, "I") || !strcmp(choice, "i") ? printf("Performance section.\n") :
+        !strcmp(choice, "II") || !strcmp(choice, "ii") ? trainingMenu() : (void)0;
+    } while (strcmp(choice, "X") && strcmp(choice, "x"));
     return 0;
 }
