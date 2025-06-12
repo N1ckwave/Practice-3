@@ -1,0 +1,176 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <string.h>
+
+#define MAX_NICKNAME_LENGTH 50
+#define NUM_TRAINEES 10
+#define MAX_MENTORS 8
+
+const char* trainee_nicknames[NUM_TRAINEES] = {
+    "Arthur", "Ben", "Charlie", "Diana", "Ethan",
+    "Fiona", "George", "Hannah", "Ivy", "Jack"
+};
+
+typedef struct {
+    int id;
+    char name[MAX_NICKNAME_LENGTH];
+    int mentee_count;
+} Mentor;
+
+int parseIntMember(const char* nickname);
+int getRandomAbility();
+void initTraineeData(int trainee_data[][2], int num_trainees, const char* nicknames[]);
+void inputMentors(Mentor mentor_list[], int* num_mentors);
+void matchMentoring(int trainee_data[][2], int num_trainees, Mentor mentor_list[], int num_mentors);
+
+int main() {
+    srand((unsigned int)time(NULL));
+
+    int trainee_data[NUM_TRAINEES][2];
+    Mentor mentor_list[MAX_MENTORS];
+    int num_registered_mentors = 0;
+
+    printf("--- Millieway Trainee Mentoring System ---\n\n");
+
+    printf("Initializing trainee data...\n");
+    initTraineeData(trainee_data, NUM_TRAINEES, trainee_nicknames);
+    printf("Trainee data initialized.\n\n");
+
+    printf("Inputting mentor data...\n");
+    inputMentors(mentor_list, &num_registered_mentors);
+    printf("Mentor data input complete. Total mentors: %d\n\n", num_registered_mentors);
+
+    if (num_registered_mentors == 0) {
+        printf("No mentors registered. Cannot perform mentoring assignment.\n");
+        return 0;
+    }
+
+    printf("\n--- Mentoring Assignment Results ---\n");
+    matchMentoring(trainee_data, NUM_TRAINEES, mentor_list, num_registered_mentors);
+
+    printf("\nMentoring assignment complete.\n");
+
+    return 0;
+}
+
+int parseIntMember(const char* nickname) {
+    int ascii_sum = 0;
+    int i = 0;
+    while (nickname[i] != '\0') {
+        ascii_sum += (int)nickname[i];
+        i++;
+    }
+    return ascii_sum;
+}
+
+int getRandomAbility() {
+    return rand() % (1000 - 100 + 1) + 100;
+}
+
+void initTraineeData(int trainee_data[][2], int num_trainees, const char* nicknames[]) {
+    int i;
+    for (i = 0; i < num_trainees; i++) {
+        trainee_data[i][0] = parseIntMember(nicknames[i]);
+        trainee_data[i][1] = getRandomAbility();
+    }
+}
+
+void inputMentors(Mentor mentor_list[], int* num_mentors) {
+    int i;
+    char input_name[MAX_NICKNAME_LENGTH];
+
+    *num_mentors = 0;
+
+    printf("Please enter mentor details (you can register up to %d mentors).\n", MAX_MENTORS);
+    printf("Type 'done' for the mentor's name when you are finished entering mentors.\n");
+
+    for (i = 0; i < MAX_MENTORS; i++) {
+        printf("Enter Name for Mentor %d (or type 'done'): ", i + 1);
+        scanf("%s", input_name);
+
+        if (strcmp(input_name, "done") == 0) {
+            break;
+        }
+
+        mentor_list[i].id = i + 1;
+        strcpy(mentor_list[i].name, input_name);
+        mentor_list[i].mentee_count = 0;
+
+        (*num_mentors)++;
+    }
+    while (getchar() != '\n');
+}
+
+void matchMentoring(int trainee_data[][2], int num_trainees, Mentor mentor_list[], int num_mentors) {
+    int i, j;
+    int assigned_mentor_index;
+
+    int mentor_assigned_first_mentee[MAX_MENTORS] = {0};
+
+    printf("\n--- Attempting Initial 1:1 Mentoring Assignments ---\n");
+    for (i = 0; i < num_mentors && i < num_trainees; i++) {
+        assigned_mentor_index = i;
+
+        if (assigned_mentor_index < num_mentors) {
+            printf("Trainee %d (%s) (List No: %d) matched to Mentor ID: %d (%s) (1:1 Bonus Assignment)\n",
+                   i + 1,
+                   trainee_nicknames[i],
+                   i + 1,
+                   mentor_list[assigned_mentor_index].id,
+                   mentor_list[assigned_mentor_index].name);
+
+            mentor_list[assigned_mentor_index].mentee_count++;
+            mentor_assigned_first_mentee[assigned_mentor_index] = 1;
+        } else {
+            printf("Error: Could not assign Trainee %d for 1:1 bonus (mentor index out of bounds).\n", i + 1);
+        }
+    }
+
+    printf("\n--- Matching Remaining Trainees (Using Remainder Rule) ---\n");
+    for (i = 0; i < num_trainees; i++) {
+        if (i < num_mentors && mentor_assigned_first_mentee[i] == 1) {
+            continue;
+        }
+
+        int trainee_list_number = i + 1;
+
+        int target_mentor_id_from_remainder = (trainee_list_number % num_mentors);
+        if (target_mentor_id_from_remainder == 0) {
+            target_mentor_id_from_remainder = num_mentors;
+        }
+
+        assigned_mentor_index = -1;
+        for (j = 0; j < num_mentors; j++) {
+            if (mentor_list[j].id == target_mentor_id_from_remainder) {
+                assigned_mentor_index = j;
+                break;
+            }
+        }
+
+        if (assigned_mentor_index != -1) {
+            printf("Trainee %d (%s) (List No: %d) matched to Mentor ID: %d (%s)\n",
+                   i + 1,
+                   trainee_nicknames[i],
+                   trainee_list_number,
+                   mentor_list[assigned_mentor_index].id,
+                   mentor_list[assigned_mentor_index].name);
+
+            mentor_list[assigned_mentor_index].mentee_count++;
+        } else {
+            printf("Trainee %d (%s) (List No: %d) could not be matched. No mentor found for remainder mapping to ID %d.\n",
+                   i + 1, trainee_nicknames[i], trainee_list_number, target_mentor_id_from_remainder);
+        }
+    }
+
+    printf("\n--- Summary: Mentee Count Per Mentor ---\n");
+    for (i = 0; i < num_mentors; i++) {
+        printf("Mentor ID: %d (%s) has %d mentee(s).\n",
+               mentor_list[i].id, mentor_list[i].name, mentor_list[i].mentee_count);
+        if (mentor_list[i].mentee_count > 1) {
+            printf("  * Note: This mentor has more than one mentee. Strict 1:1 ratio not maintained for all assignments.\n");
+        } else if (mentor_list[i].mentee_count == 0) {
+             printf("  * Note: This mentor has no mentees.\n");
+        }
+    }
+}
